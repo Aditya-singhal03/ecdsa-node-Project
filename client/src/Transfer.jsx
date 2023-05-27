@@ -1,25 +1,36 @@
 import { useState } from "react";
 import server from "./server";
 
-function Transfer({ address, setBalance }) {
-  const [sendAmount, setSendAmount] = useState("");
+function Transfer({ address, setBalance, sign, setTransaction}) {
+  const [sendAmount, setSendAmount] = useState(0);
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
+
+  
 
   async function transfer(evt) {
     evt.preventDefault();
 
     try {
+      console.log("eneterd")
+      const signatureString = {
+        r: sign.r.toString(),
+        s: sign.s.toString(),
+        recovery: sign.recovery.toString(),
+      };
       const {
-        data: { balance },
+        data: { balance,transaction},
       } = await server.post(`send`, {
         sender: address,
-        amount: parseInt(sendAmount),
+        amount: Number(sendAmount),
+        signatureString: signatureString,
         recipient,
       });
       setBalance(balance);
+      setTransaction(transaction);
     } catch (ex) {
+      console.log(ex);
       alert(ex.response.data.message);
     }
   }
